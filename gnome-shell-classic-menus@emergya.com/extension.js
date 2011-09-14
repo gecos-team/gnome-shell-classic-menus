@@ -53,7 +53,7 @@ PopupMenu.PopupSubMenuMenuItem.prototype._init = function(text) {
     this._triangle = new St.Label({ text: '\u25B8' });
     this.addActor(this._triangle, { align: St.Align.END });
     
-    this.menu = new PopupMenu.PopupMenu(this.actor, 1.2, St.Side.LEFT, 0);
+    this.menu = new PopupMenu.PopupMenu(this.actor, 0.5, St.Side.LEFT, 0);
     //this.menu.connect('open-state-changed', Lang.bind(this, this._subMenuOpenStateChanged));
     
     Main.chrome.addActor(this.menu.actor, { visibleInOverview: true,
