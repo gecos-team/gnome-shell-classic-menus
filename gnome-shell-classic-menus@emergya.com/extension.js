@@ -32,9 +32,6 @@ const St = imports.gi.St;
 const Main = imports.ui.main;
 const PopupMenu = imports.ui.popupMenu;
 const PanelMenu = imports.ui.panelMenu;
-const Gettext = imports.gettext;
-const _ = Gettext.gettext;
-
 const Lang = imports.lang;
 const Shell = imports.gi.Shell;
 const BoxPointer = imports.ui.boxpointer;
@@ -44,6 +41,9 @@ const Gtk = imports.gi.Gtk;
 let lastOpened = null;
 
 
+/**
+ * Implements an "almost" classic menu.
+ */
 function PopupSubMenuClassic() {
     this._init.apply(this, arguments);
 }
@@ -193,6 +193,9 @@ PopupSubMenuClassic.prototype = {
 };
 
 
+/**
+ * Make the PopupSubMenuMenuItem use the new PopupSubMenuClassic.
+ */
 PopupMenu.PopupSubMenuMenuItem.prototype._init = function(text) {
     PopupMenu.PopupBaseMenuItem.prototype._init.call(this);
 
@@ -240,96 +243,9 @@ PopupMenu.PopupSubMenuMenuItem.prototype._onKeyPressEvent = function(actor, even
 };
 
 
-
-
-function PlacesButton() {
-    this._init();
-}
- 
-PlacesButton.prototype = {
-    __proto__: PanelMenu.Button.prototype,
- 
-    _init: function() {
-        PanelMenu.Button.prototype._init.call(this, 0.0);
- 
-        this._label = new St.Label({ text: _("MyPlaces - Test") });
-        this.actor.set_child(this._label);
-        //Main.panel._centerBox.add(this.actor, { y_fill: true });
- 
-        let placeid;
-        this.placeItems = [];
- 
-        this.defaultPlaces = Main.placesManager.getDefaultPlaces();
-        this.bookmarks     = Main.placesManager.getBookmarks();
-        this.mounts        = Main.placesManager.getMounts();
-        
-
-        // Display default places
-        for ( placeid = 0; placeid < this.defaultPlaces.length; placeid++) {
-            this.placeItems[placeid] = new PopupMenu.PopupMenuItem(_(this.defaultPlaces[placeid].name));
-            this.placeItems[placeid].place = this.defaultPlaces[placeid];
-            this.menu.addMenuItem(this.placeItems[placeid]);
-            this.placeItems[placeid].connect('activate', function(actor,event) {
-                actor.place.launch();
-            });
- 
-        }
- 
-        this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
-        // Display default bookmarks
-        for ( let bookmarkid = 0; bookmarkid < this.bookmarks.length; bookmarkid++, placeid++) {
-            this.placeItems[placeid] = new PopupMenu.PopupMenuItem(_(this.bookmarks[bookmarkid].name));
-            this.placeItems[placeid].place = this.bookmarks[bookmarkid];
-            this.menu.addMenuItem(this.placeItems[placeid]);
-            this.placeItems[placeid].connect('activate', function(actor,event) {
-                actor.place.launch();
-            });
-        }
- 
-        if (this.mounts.length > 0) {
-            this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
-        }
- 
-        // Display default mounts
-        for ( let mountid = 0; mountid < this.mounts.length; placeid++, mountid++ ) {
-            this.placeItems[placeid] = new PopupMenu.PopupMenuItem(_(this.mounts[mountid].name));
-            this.placeItems[placeid].place = this.mounts[mountid];
-            this.menu.addMenuItem(this.placeItems[placeid]);
-            this.placeItems[placeid].connect('activate', function(actor,event) {
-                actor.place.launch();
-            });
-        }
-        
-        
-        let submenu = createSubmenu();
-        this.menu.addMenuItem(submenu);
-        submenu.menu.addMenuItem(createSubmenu());
- 
-        Main.panel._leftBox.add(this.actor, { y_fill: true });
-        Main.panel._menus.addMenu(this.menu);
- 
-    }
- 
-};
-
-
-function createSubmenu() {
-
-    let submenu = new PopupMenu.PopupSubMenuMenuItem("Submenu");
-    
-    let _items = [];
-    _items[0] = new PopupMenu.PopupMenuItem("Submenu item 1");
-    _items[1] = new PopupMenu.PopupMenuItem("Submenu item 2");
-    _items[2] = new PopupMenu.PopupMenuItem("Submenu item 3");
-    
-    for (let i=0, l=_items.length; i<l; i++) {
-        submenu.menu.addMenuItem(_items[i]);
-    }
-    
-    return submenu;
-}
-
-
+/**
+ * Update the menus created before the load of this extension.
+ */
 function updateSubMenuItems(menu, menuItem) {
  
     let items = menu._getMenuItems();
