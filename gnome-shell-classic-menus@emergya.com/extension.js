@@ -128,6 +128,7 @@ PopupSubMenuClassic.prototype = {
     },
 
     toggle: function(eventType) {
+        
         if (this.isOpen)
             this.close(true);
         else
@@ -161,7 +162,7 @@ PopupSubMenuClassic.prototype = {
         
         lastOpened = this;
         this.isOpen = true;
-
+        
         this._boxPointer.setPosition(this.sourceActor, this._gap, this._alignment);
         
         let [x, y, mask] = global.get_pointer();
@@ -335,17 +336,13 @@ function updateSubMenuItems(menu, menuItem) {
     
     for (let i=0, l=items.length; i<l; i++) {
         
-        let new_item = null;
         let item = items[i];
-        
-        try {
         
         if (item instanceof PopupMenu.PopupSubMenuMenuItem) {
 
             let text = item.label.get_text();
-            
-            new_item = new PopupMenu.PopupSubMenuMenuItem(text);
-            menuItem.addMenuItem(new_item);
+            let new_item = new PopupMenu.PopupSubMenuMenuItem(text);
+            menuItem.menu.addMenuItem(new_item);
 
             updateSubMenuItems(item.menu, new_item);
             
@@ -353,13 +350,6 @@ function updateSubMenuItems(menu, menuItem) {
             
             item.actor.reparent(menuItem.menu.box);
         }
-        
-        } catch (e) {
-            global.log(e);
-            for (let o in item)
-                global.log(o);
-        }
-        
     }
 }
 
@@ -377,6 +367,7 @@ function updateMenuItems(menu) {
             let new_item = new PopupMenu.PopupSubMenuMenuItem(text);
             
             menu.box.remove_actor(item.actor);
+            item.actor.destroy();
             menu.addMenuItem(new_item, i);
 
             updateSubMenuItems(item.menu, new_item);
@@ -393,6 +384,16 @@ function main(extensionMeta) {
     Main.panel._menus._menus.forEach(function(menu) {
         updateMenuItems(menu.menu);
     });
+
+    // Wait until all the indicators are loaded, so we can change all the menus.
+    /*Main.panel.startStatusArea = Lang.bind(Main.panel, function() {
+    
+        this.__proto__.startStatusArea.call(this);
+
+        this._menus._menus.forEach(function(menu) {
+            updateMenuItems(menu.menu);
+        });
+    });*/
 }
 
 function init(meta) {
@@ -400,9 +401,7 @@ function init(meta) {
 }
 
 function enable() {
-    
 }
 
 function disable() {
-    
 }
