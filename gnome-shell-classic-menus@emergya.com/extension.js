@@ -43,46 +43,123 @@ const Gtk = imports.gi.Gtk;
 
 let lastOpened = null;
 
-PopupMenu.PopupSubMenuMenuItem.prototype._init = function(text) {
-    PopupMenu.PopupBaseMenuItem.prototype._init.call(this);
 
-    this.actor.add_style_class_name('popup-submenu-menu-item');
+function PopupSubMenuClassic() {
+    this._init.apply(this, arguments);
+}
 
-    this.label = new St.Label({ text: text });
-    this.addActor(this.label);
-    this._triangle = new St.Label({ text: '\u25B8' });
-    this.addActor(this._triangle, { align: St.Align.END });
+PopupSubMenuClassic.prototype = {
+    __proto__: PopupMenu.PopupMenu.prototype,
+/*
+    _init: function(sourceActor, alignment, arrowSide, gap) {
+        PopupMenu.PopupMenu.prototype._init.call (this, sourceActor, 'popup-menu-content');
+
+        this._alignment = alignment;
+        this._arrowSide = arrowSide;
+        this._gap = gap;
+
+        this._boxPointer = new BoxPointer.BoxPointer(arrowSide,
+                                                     { x_fill: true,
+                                                       y_fill: true,
+                                                       x_align: St.Align.START });
+        this.actor = this._boxPointer.actor;
+        this.actor._delegate = this;
+        this.actor.style_class = 'popup-menu-boxpointer';
+        this.actor.connect('key-press-event', Lang.bind(this, this._onKeyPressEvent));
+
+        this._boxWrapper = new Shell.GenericContainer();
+        this._boxWrapper.connect('get-preferred-width', Lang.bind(this, this._boxGetPreferredWidth));
+        this._boxWrapper.connect('get-preferred-height', Lang.bind(this, this._boxGetPreferredHeight));
+        this._boxWrapper.connect('allocate', Lang.bind(this, this._boxAllocate));
+        this._boxPointer.bin.set_child(this._boxWrapper);
+        this._boxWrapper.add_actor(this.box);
+        this.actor.add_style_class_name('popup-menu');
+
+        global.focus_manager.add_group(this.actor);
+        this.actor.reactive = true;
+    },
+
+    _boxGetPreferredWidth: function (actor, forHeight, alloc) {
+        let columnWidths = this.getColumnWidths();
+        this.setColumnWidths(columnWidths);
+
+        // Now they will request the right sizes
+        [alloc.min_size, alloc.natural_size] = this.box.get_preferred_width(forHeight);
+    },
+
+    _boxGetPreferredHeight: function (actor, forWidth, alloc) {
+        [alloc.min_size, alloc.natural_size] = this.box.get_preferred_height(forWidth);
+    },
+
+    _boxAllocate: function (actor, box, flags) {
+        this.box.allocate(box, flags);
+    },
+*/
+    _onKeyPressEvent: function(actor, event) {
+        if (event.get_key_symbol() == Clutter.Escape) {
+            this.close(true);
+            return true;
+        }
+
+        return false;
+    },
+/*
+    setArrowOrigin: function(origin) {
+        this._boxPointer.setArrowOrigin(origin);
+    },
+*/
+    open: function(animate, eventType) {
+        
+        if (eventType == Clutter.EventType.KEY_PRESS) {
+            
+            this._keyOpen(animate);
+            return;
+            
+        } else if (eventType == Clutter.EventType.BUTTON_RELEASE) {
+            
+            this._btnOpen(animate);
+            return;
+            
+        } else {
+            
+            //global.log(eventType);
+            //global.log(Clutter.EventType.KEY_PRESS);
+        }
+    },
+
+    toggle: function(eventType) {
+        if (this.isOpen)
+            this.close(true);
+        else
+            this.open(true, eventType);
+    },
     
-    this.menu = new PopupMenu.PopupMenu(this.actor, 0.5, St.Side.LEFT, 0);
-    //this.menu.connect('open-state-changed', Lang.bind(this, this._subMenuOpenStateChanged));
-    
-    Main.chrome.addActor(this.menu.actor, { visibleInOverview: true,
-                                            affectsStruts: false });
-    this.menu.actor.hide();
-    
-    this.menu._keyOpen = Lang.bind(this.menu, function(animate) {
-        if (lastOpened && lastOpened.isOpen) {
+    _keyOpen: function(animate) {
+        
+        if (this.isOpen)
+            return;
+
+        if (lastOpened && lastOpened.isOpen)
             lastOpened.close(true);
-        }
+        
         lastOpened = this;
-        try {
-            this.__proto__.open.call(this, animate);
-        } catch(e) {
-            global.logError(e);
-        }
-    });
+        this.isOpen = true;
+
+        this._boxPointer.setPosition(this.sourceActor, this._gap, this._alignment);
+        this._boxPointer.show(animate);
+
+        this.emit('open-state-changed', true);
+    },
     
-    this.menu._btnOpen = Lang.bind(this.menu, function(animate) {
+    _btnOpen: function(animate) {
         
         if (this.isOpen)
             return;
         
-        if (lastOpened && lastOpened.isOpen) {
+        if (lastOpened && lastOpened.isOpen)
             lastOpened.close(true);
-        }
         
         lastOpened = this;
-
         this.isOpen = true;
 
         this._boxPointer.setPosition(this.sourceActor, this._gap, this._alignment);
@@ -96,38 +173,69 @@ PopupMenu.PopupSubMenuMenuItem.prototype._init = function(text) {
         this._boxPointer.show(animate);
 
         this.emit('open-state-changed', true);
-    });
+    },
+
+    close: function(animate) {
+        if (!this.isOpen)
+            return;
+
+        if (this._activeMenuItem)
+            this._activeMenuItem.setActive(false);
+
+        this._boxPointer.hide(animate);
+
+        this.isOpen = false;
+        lastOpened = null;
+        
+        this.emit('open-state-changed', false);
+    }
+};
+
+
+PopupMenu.PopupSubMenuMenuItem.prototype._init = function(text) {
+    PopupMenu.PopupBaseMenuItem.prototype._init.call(this);
+
+    this.actor.add_style_class_name('popup-submenu-menu-item');
+
+    this.label = new St.Label({ text: text });
+    this.addActor(this.label);
+    this._triangle = new St.Label({ text: '\u25B8' });
+    this.addActor(this._triangle, { align: St.Align.END });
     
-    /*this.menu._needsScrollbar = Lang.bind(this.menu, function() {
-        let items = this._getMenuItems();
-        return items.length > 10;
-    });*/
+    this.menu = new PopupSubMenuClassic(this.actor, 0.5, St.Side.LEFT, 0);
+    //this.menu = new PopupMenu.PopupMenu(this.actor, 0.5, St.Side.LEFT, 0);
+    //this.menu.connect('open-state-changed', Lang.bind(this, this._subMenuOpenStateChanged));
+    
+    Main.chrome.addActor(this.menu.actor, { visibleInOverview: true,
+                                            affectsStruts: false });
+    this.menu.actor.hide();
 };
 
 PopupMenu.PopupSubMenuMenuItem.prototype._onButtonReleaseEvent = function (actor, event) {
-    this.menu.open = this.menu._btnOpen;
-    this.menu.toggle();
+    this.menu.toggle(event.type());
 };
 
 PopupMenu.PopupSubMenuMenuItem.prototype._onKeyPressEvent = function(actor, event) {
     let symbol = event.get_key_symbol();
 
-    if (symbol == Clutter.KEY_Right) {
+    if (symbol == Clutter.KEY_Right && !this.menu.isOpen) {
 
-        this.menu.open = this.menu._keyOpen;
-        this.menu.open(true);
-        
-        //this.menu.actor.navigate_focus(null, Gtk.DirectionType.DOWN, false);
-        
+        this.menu.open(true, event.type());
+        //this.menu.actor.navigate_focus(null, Gtk.DirectionType.DOWN, false);        
         return true;
         
     } else if (symbol == Clutter.KEY_Left && this.menu.isOpen) {
         
         this.menu.close();
         return true;
+        
+    } else if (symbol == Clutter.KEY_space || symbol == Clutter.KEY_Return) {
+        
+        this.menu.toggle(event.type());
+        return true;
     }
-
-    return PopupMenu.PopupBaseMenuItem.prototype._onKeyPressEvent.call(this, actor, event);
+    
+    return false;
 };
 
 
@@ -277,7 +385,7 @@ function updateMenuItems(menu) {
     
     return menu;
 }
- 
+
 function main(extensionMeta) {
  
     new PlacesButton();
