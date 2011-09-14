@@ -120,7 +120,9 @@ PopupMenu.PopupSubMenuMenuItem.prototype._onKeyPressEvent = function(actor, even
         //this.menu.actor.navigate_focus(null, Gtk.DirectionType.DOWN, false);
         
         return true;
+        
     } else if (symbol == Clutter.KEY_Left && this.menu.isOpen) {
+        
         this.menu.close();
         return true;
     }
@@ -141,7 +143,7 @@ PlacesButton.prototype = {
     _init: function() {
         PanelMenu.Button.prototype._init.call(this, 0.0);
  
-        this._label = new St.Label({ text: _("MyPlaces") });
+        this._label = new St.Label({ text: _("MyPlaces - Test") });
         this.actor.set_child(this._label);
         //Main.panel._centerBox.add(this.actor, { y_fill: true });
  
@@ -153,21 +155,6 @@ PlacesButton.prototype = {
         this.mounts        = Main.placesManager.getMounts();
         
 
-        let submenu = new PopupMenu.PopupSubMenuMenuItem("Submenu");
-        this.menu.addMenuItem(submenu);
-        
-        let _items = [];
-        _items[0] = new PopupMenu.PopupMenuItem("Submenu item 1");
-        _items[1] = new PopupMenu.PopupMenuItem("Submenu item 2");
-        _items[2] = new PopupMenu.PopupMenuItem("Submenu item 3");
-        
-        for (let i=0, l=_items.length; i<l; i++) {
-            submenu.menu.addMenuItem(_items[i]);
-        }
-        
-        
-        
- 
         // Display default places
         for ( placeid = 0; placeid < this.defaultPlaces.length; placeid++) {
             this.placeItems[placeid] = new PopupMenu.PopupMenuItem(_(this.defaultPlaces[placeid].name));
@@ -205,22 +192,9 @@ PlacesButton.prototype = {
         }
         
         
-        
-        let submenu = new PopupMenu.PopupSubMenuMenuItem("Submenu");
+        let submenu = createSubmenu();
         this.menu.addMenuItem(submenu);
-        
-        let _items = [];
-        _items[0] = new PopupMenu.PopupMenuItem("Submenu item 1");
-        _items[1] = new PopupMenu.PopupMenuItem(this.defaultPlaces[0].name);
-        _items[1].place = this.defaultPlaces[0]
-        _items[1].connect('activate', function(actor, event) {
-            actor.place.launch();
-        });
-        _items[2] = new PopupMenu.PopupMenuItem("Submenu item 3");
-        
-        for (let i=0, l=_items.length; i<l; i++) {
-            submenu.menu.addMenuItem(_items[i]);
-        }
+        submenu.menu.addMenuItem(createSubmenu());
  
         Main.panel._leftBox.add(this.actor, { y_fill: true });
         Main.panel._menus.addMenu(this.menu);
@@ -228,6 +202,23 @@ PlacesButton.prototype = {
     }
  
 };
+
+
+function createSubmenu() {
+
+    let submenu = new PopupMenu.PopupSubMenuMenuItem("Submenu");
+    
+    let _items = [];
+    _items[0] = new PopupMenu.PopupMenuItem("Submenu item 1");
+    _items[1] = new PopupMenu.PopupMenuItem("Submenu item 2");
+    _items[2] = new PopupMenu.PopupMenuItem("Submenu item 3");
+    
+    for (let i=0, l=_items.length; i<l; i++) {
+        submenu.menu.addMenuItem(_items[i]);
+    }
+    
+    return submenu;
+}
 
 
 function updateSubMenuItems(menu, menuItem) {
