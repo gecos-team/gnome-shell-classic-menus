@@ -28,6 +28,10 @@
  * 
  */
 
+/**
+ * @branch 3.0.x
+ */
+
 const St = imports.gi.St;
 const Main = imports.ui.main;
 const PopupMenu = imports.ui.popupMenu;
