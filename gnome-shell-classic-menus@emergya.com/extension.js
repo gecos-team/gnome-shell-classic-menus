@@ -299,8 +299,6 @@ function updateMenuItems(menu) {
 
 function main(extensionMeta) {
  
-    new PlacesButton();
-
     Main.panel._menus._menus.forEach(function(menu) {
         updateMenuItems(menu.menu);
     });
