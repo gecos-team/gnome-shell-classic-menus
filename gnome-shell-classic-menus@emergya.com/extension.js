@@ -28,10 +28,6 @@
  * 
  */
 
-/**
- * @branch 3.1.91
- */
-
 const St = imports.gi.St;
 const Main = imports.ui.main;
 const PopupMenu = imports.ui.popupMenu;
@@ -299,8 +295,6 @@ function updateMenuItems(menu) {
 
 function main(extensionMeta) {
  
-    new PlacesButton();
-
     Main.panel._menus._menus.forEach(function(menu) {
         updateMenuItems(menu.menu);
     });
