@@ -225,20 +225,20 @@ PopupMenu.PopupSubMenuMenuItem.prototype._onKeyPressEvent = function(actor, even
     if (symbol == Clutter.KEY_Right && !this.menu.isOpen) {
 
         this.menu.open(true, event.type());
-        //this.menu.actor.navigate_focus(null, Gtk.DirectionType.DOWN, false);        
+        //this.menu.actor.navigate_focus(null, Gtk.DirectionType.DOWN, false);
         return true;
-        
+
     } else if (symbol == Clutter.KEY_Left && this.menu.isOpen) {
-        
+
         this.menu.close();
         return true;
-        
-    } else if (symbol == Clutter.KEY_space || symbol == Clutter.KEY_Return) {
-        
+
+    } else if (symbol == Clutter.KEY_space || symbol == Clutter.KEY_Return || symbol == Clutter.KP_Enter) {
+
         this.menu.toggle(event.type());
         return true;
     }
-    
+
     return false;
 };
 
