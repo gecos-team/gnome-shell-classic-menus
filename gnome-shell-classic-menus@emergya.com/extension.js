@@ -1,19 +1,19 @@
 /**
  * extension.js
  * Copyright (C) 2011, Junta de Andalucía <devmaster@guadalinex.org>
- * 
+ *
  * This file is part of Guadalinex
- * 
+ *
  * This software is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This software is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
@@ -23,9 +23,9 @@
  * resulting executable to be covered by the GNU General Public License.
  * This exception does not however invalidate any other reasons why the
  * executable file might be covered by the GNU General Public License.
- * 
- * Authors:: Antonio Hernández (mailto:ahernandez@emergya.com)
- * 
+ *
+ * Author: Antonio Hernández <ahernandez@emergya.com>
+ *
  */
 
 const St = imports.gi.St;
@@ -50,51 +50,7 @@ function PopupSubMenuClassic() {
 
 PopupSubMenuClassic.prototype = {
     __proto__: PopupMenu.PopupMenu.prototype,
-/*
-    _init: function(sourceActor, alignment, arrowSide, gap) {
-        PopupMenu.PopupMenu.prototype._init.call (this, sourceActor, 'popup-menu-content');
 
-        this._alignment = alignment;
-        this._arrowSide = arrowSide;
-        this._gap = gap;
-
-        this._boxPointer = new BoxPointer.BoxPointer(arrowSide,
-                                                     { x_fill: true,
-                                                       y_fill: true,
-                                                       x_align: St.Align.START });
-        this.actor = this._boxPointer.actor;
-        this.actor._delegate = this;
-        this.actor.style_class = 'popup-menu-boxpointer';
-        this.actor.connect('key-press-event', Lang.bind(this, this._onKeyPressEvent));
-
-        this._boxWrapper = new Shell.GenericContainer();
-        this._boxWrapper.connect('get-preferred-width', Lang.bind(this, this._boxGetPreferredWidth));
-        this._boxWrapper.connect('get-preferred-height', Lang.bind(this, this._boxGetPreferredHeight));
-        this._boxWrapper.connect('allocate', Lang.bind(this, this._boxAllocate));
-        this._boxPointer.bin.set_child(this._boxWrapper);
-        this._boxWrapper.add_actor(this.box);
-        this.actor.add_style_class_name('popup-menu');
-
-        global.focus_manager.add_group(this.actor);
-        this.actor.reactive = true;
-    },
-
-    _boxGetPreferredWidth: function (actor, forHeight, alloc) {
-        let columnWidths = this.getColumnWidths();
-        this.setColumnWidths(columnWidths);
-
-        // Now they will request the right sizes
-        [alloc.min_size, alloc.natural_size] = this.box.get_preferred_width(forHeight);
-    },
-
-    _boxGetPreferredHeight: function (actor, forWidth, alloc) {
-        [alloc.min_size, alloc.natural_size] = this.box.get_preferred_height(forWidth);
-    },
-
-    _boxAllocate: function (actor, box, flags) {
-        this.box.allocate(box, flags);
-    },
-*/
     _onKeyPressEvent: function(actor, event) {
         if (event.get_key_symbol() == Clutter.Escape) {
             this.close(true);
@@ -103,46 +59,42 @@ PopupSubMenuClassic.prototype = {
 
         return false;
     },
-/*
-    setArrowOrigin: function(origin) {
-        this._boxPointer.setArrowOrigin(origin);
-    },
-*/
+
     open: function(animate, eventType) {
-        
+
         if (eventType == Clutter.EventType.KEY_PRESS) {
-            
+
             this._keyOpen(animate);
             return;
-            
+
         } else if (eventType == Clutter.EventType.BUTTON_RELEASE) {
-            
+
             this._btnOpen(animate);
             return;
-            
+
         } else {
-            
-            //global.log(eventType);
-            //global.log(Clutter.EventType.KEY_PRESS);
+
+            global.log('Event type don\'t recognized: ' + eventType);
+            global.log('Expected BUTTON_RELEASE (' + Clutter.EventType.BUTTON_RELEASE + ') or KEY_PRESS (' + Clutter.EventType.KEY_PRESS + ')');
         }
     },
 
     toggle: function(eventType) {
-        
+
         if (this.isOpen)
             this.close(true);
         else
             this.open(true, eventType);
     },
-    
+
     _keyOpen: function(animate) {
-        
+
         if (this.isOpen)
             return;
 
         if (lastOpened && lastOpened.isOpen)
             lastOpened.close(true);
-        
+
         lastOpened = this;
         this.isOpen = true;
 
@@ -151,27 +103,28 @@ PopupSubMenuClassic.prototype = {
 
         this.emit('open-state-changed', true);
     },
-    
+
     _btnOpen: function(animate) {
-        
+
         if (this.isOpen)
             return;
-        
+
         if (lastOpened && lastOpened.isOpen)
             lastOpened.close(true);
-        
+
         lastOpened = this;
         this.isOpen = true;
-        
+
         this._boxPointer.setPosition(this.sourceActor, this._gap, this._alignment);
-        
+
         let [x, y, mask] = global.get_pointer();
         this._boxPointer._xPosition = x + 10;
-        
+
         this.actor.set_anchor_point(-(this._boxPointer._xPosition + this._boxPointer._xOffset),
                 -(this._boxPointer._yPosition + this._boxPointer._yOffset));
 
         this._boxPointer.show(animate);
+        this.actor.raise_top();
 
         this.emit('open-state-changed', true);
     },
@@ -187,7 +140,7 @@ PopupSubMenuClassic.prototype = {
 
         this.isOpen = false;
         lastOpened = null;
-        
+
         this.emit('open-state-changed', false);
     }
 };
@@ -245,13 +198,13 @@ PopupMenu.PopupSubMenuMenuItem.prototype._onKeyPressEvent = function(actor, even
  * Update the menus created before the load of this extension.
  */
 function updateSubMenuItems(menu, menuItem) {
- 
+
     let items = menu._getMenuItems();
-    
+
     for (let i=0, l=items.length; i<l; i++) {
-        
+
         let item = items[i];
-        
+
         if (item instanceof PopupMenu.PopupSubMenuMenuItem) {
 
             let text = item.label.get_text();
@@ -259,9 +212,9 @@ function updateSubMenuItems(menu, menuItem) {
             menuItem.menu.addMenuItem(new_item);
 
             updateSubMenuItems(item.menu, new_item);
-            
+
         } else {
-            
+
             item.actor.reparent(menuItem.menu.box);
         }
     }
@@ -270,16 +223,16 @@ function updateSubMenuItems(menu, menuItem) {
 function updateMenuItems(menu) {
 
     let items = menu._getMenuItems();
-    
+
     for (let i=0, l=items.length; i<l; i++) {
-        
+
         let item = items[i];
-        
+
         if (item instanceof PopupMenu.PopupSubMenuMenuItem) {
-            
+
             let text = item.label.get_text();
             let new_item = new PopupMenu.PopupSubMenuMenuItem(text);
-            
+
             menu.box.remove_actor(item.actor);
             item.actor.destroy();
             menu.addMenuItem(new_item, i);
@@ -287,19 +240,19 @@ function updateMenuItems(menu) {
             updateSubMenuItems(item.menu, new_item);
         }
     };
-    
+
     return menu;
 }
 
 function main(extensionMeta) {
- 
+
     Main.panel._menus._menus.forEach(function(menu) {
         updateMenuItems(menu.menu);
     });
 
     // Wait until all the indicators are loaded, so we can change all the menus.
     /*Main.panel.startStatusArea = Lang.bind(Main.panel, function() {
-    
+
         this.__proto__.startStatusArea.call(this);
 
         this._menus._menus.forEach(function(menu) {
