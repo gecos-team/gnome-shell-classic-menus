@@ -98,6 +98,7 @@ PopupSubMenuClassic.prototype = {
         lastOpened = this;
         this.isOpen = true;
 
+        this.actor.raise_top();
         this._boxPointer.setPosition(this.sourceActor, this._alignment);
         this._boxPointer.show(animate);
 
@@ -115,6 +116,7 @@ PopupSubMenuClassic.prototype = {
         lastOpened = this;
         this.isOpen = true;
 
+        this.actor.raise_top();
         this._boxPointer.setPosition(this.sourceActor, this._alignment);
 
         let [x, y, mask] = global.get_pointer();
@@ -124,7 +126,6 @@ PopupSubMenuClassic.prototype = {
                 -(this._boxPointer._yPosition + this._boxPointer._yOffset));
 
         this._boxPointer.show(animate);
-        this.actor.raise_top();
 
         this.emit('open-state-changed', true);
     },
