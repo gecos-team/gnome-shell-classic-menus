@@ -195,20 +195,20 @@ PopupMenu.PopupSubMenuMenuItem.prototype._onKeyPressEvent = function(actor, even
     return false;
 };
 
-PopupMenu.PopupSubMenuMenuItem.prototype._onKeyFocusIn = function(actor) {
+PopupMenu.PopupBaseMenuItem.prototype._onKeyFocusIn = function(actor) {
 
-    if (lastOpened != null) {
+    if (this.menu && lastOpened != null) {
         this.menu.open(true, Clutter.EventType.KEY_PRESS);
     }
 
     this.setActive(true);
 };
 
-PopupMenu.PopupSubMenuMenuItem.prototype._onHoverChanged = function(actor) {
+PopupMenu.PopupBaseMenuItem.prototype._onHoverChanged = function(actor) {
 
     let activeChanged = actor.hover != this.active;
 
-    if (activeChanged && actor.hover && lastOpened != null) {
+    if (this.menu && activeChanged && actor.hover && lastOpened != null) {
         this.menu.open(true, Clutter.EventType.BUTTON_RELEASE);
     }
 
