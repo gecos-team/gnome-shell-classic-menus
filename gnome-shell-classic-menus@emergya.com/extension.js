@@ -164,6 +164,7 @@ PopupMenu.PopupSubMenuMenuItem.prototype._init = function(text) {
 
     Main.layoutManager._chrome.addActor(this.menu.actor, { visibleInFullscreen: true,
                                             affectsStruts: false });
+    this.menu.connect('open-state-changed', Lang.bind(this, this._subMenuOpenStateChanged));
     this.menu.actor.hide();
 };
 
@@ -192,6 +193,26 @@ PopupMenu.PopupSubMenuMenuItem.prototype._onKeyPressEvent = function(actor, even
     }
 
     return false;
+};
+
+PopupMenu.PopupSubMenuMenuItem.prototype._onKeyFocusIn = function(actor) {
+
+    if (lastOpened != null) {
+        this.menu.open(true, Clutter.EventType.KEY_PRESS);
+    }
+
+    this.setActive(true);
+};
+
+PopupMenu.PopupSubMenuMenuItem.prototype._onHoverChanged = function(actor) {
+
+    let activeChanged = actor.hover != this.active;
+
+    if (activeChanged && actor.hover && lastOpened != null) {
+        this.menu.open(true, Clutter.EventType.BUTTON_RELEASE);
+    }
+
+    this.setActive(actor.hover);
 };
 
 
