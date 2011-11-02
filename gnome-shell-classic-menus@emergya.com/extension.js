@@ -150,20 +150,17 @@ PopupSubMenuClassic.prototype = {
 /**
  * Make the PopupSubMenuMenuItem use the new PopupSubMenuClassic.
  */
+
+let PopupSubMenuMenuItem_init = PopupMenu.PopupSubMenuMenuItem.prototype._init;
+
 PopupMenu.PopupSubMenuMenuItem.prototype._init = function(text) {
-    PopupMenu.PopupBaseMenuItem.prototype._init.call(this);
 
-    this.actor.add_style_class_name('popup-submenu-menu-item');
+    PopupSubMenuMenuItem_init.call(this, text);
 
-    this.label = new St.Label({ text: text });
-    this.addActor(this.label);
-    this._triangle = new St.Label({ text: '\u25B8' });
-    this.addActor(this._triangle, { align: St.Align.END });
-
+    this.menu.destroy();
     this.menu = new PopupSubMenuClassic(this.actor, 0.5, St.Side.LEFT);
 
-    Main.layoutManager._chrome.addActor(this.menu.actor, { visibleInFullscreen: true,
-                                            affectsStruts: false });
+    Main.uiGroup.add_actor(this.menu.actor);
     this.menu.connect('open-state-changed', Lang.bind(this, this._subMenuOpenStateChanged));
     this.menu.actor.hide();
 };
