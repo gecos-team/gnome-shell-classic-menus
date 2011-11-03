@@ -122,8 +122,8 @@ PopupSubMenuClassic.prototype = {
         let [x, y, mask] = global.get_pointer();
         this._boxPointer._xPosition = x + 10;
 
-        this.actor.set_anchor_point(-(this._boxPointer._xPosition + this._boxPointer._xOffset),
-                -(this._boxPointer._yPosition + this._boxPointer._yOffset));
+        //this.actor.set_anchor_point(-(this._boxPointer._xPosition + this._boxPointer._xOffset),
+        //        -(this._boxPointer._yPosition + this._boxPointer._yOffset));
 
         this._boxPointer.show(animate);
 
@@ -161,7 +161,7 @@ PopupMenu.PopupSubMenuMenuItem.prototype._init = function(text) {
     this.menu = new PopupSubMenuClassic(this.actor, 0.5, St.Side.LEFT);
 
     Main.uiGroup.add_actor(this.menu.actor);
-    this.menu.connect('open-state-changed', Lang.bind(this, this._subMenuOpenStateChanged));
+    //this.menu.connect('open-state-changed', Lang.bind(this, this._subMenuOpenStateChanged));
     this.menu.actor.hide();
 };
 
