@@ -62,10 +62,11 @@ PopupClassicSubMenu.prototype._onKeyPressEvent = function(actor, event) {
 };
 
 PopupClassicSubMenu.prototype.toggle = function(eventType) {
-    if (this.isOpen)
+    if (this.isOpen) {
         this.close(true);
-    else
+    } else {
         this.open(true, eventType);
+    }
 };
 
 PopupClassicSubMenu.prototype.open = function(animate, eventType) {
@@ -103,8 +104,23 @@ PopupClassicSubMenu.prototype.open = function(animate, eventType) {
 };
 
 PopupClassicSubMenu.prototype.close = function(animate) {
-    PopupMenu.PopupMenu.prototype.close.call(this, animate);
+
+    if (!this.isOpen)
+        return;
+
+    if (this._activeMenuItem)
+        this._activeMenuItem.setActive(false);
+
+    this._boxPointer.hide(animate);
+
+    this.isOpen = false;
+
+    // Important: Return the focus to the parent menu before emit the
+    // open-state-changed event, so it'll not be closed by the PopupMenuManager.
+    this.sourceActor.navigate_focus(null, Gtk.DirectionType.DOWN, false);
     lastOpenedMenu = null;
+
+    this.emit('open-state-changed', false);
 }
 
 
