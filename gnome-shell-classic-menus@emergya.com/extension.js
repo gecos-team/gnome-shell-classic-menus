@@ -31,145 +31,104 @@
 const St = imports.gi.St;
 const Main = imports.ui.main;
 const PopupMenu = imports.ui.popupMenu;
-const PanelMenu = imports.ui.panelMenu;
 const Lang = imports.lang;
-const Shell = imports.gi.Shell;
 const BoxPointer = imports.ui.boxpointer;
 const Clutter = imports.gi.Clutter;
 const Gtk = imports.gi.Gtk;
 
-let lastOpened = null;
+
+let lastOpenedMenu = null;
 
 
-/**
- * Implements an "almost" classic menu.
- */
-function PopupSubMenuClassic() {
+function PopupClassicSubMenu() {
     this._init.apply(this, arguments);
 }
 
-PopupSubMenuClassic.prototype = {
-    __proto__: PopupMenu.PopupMenu.prototype,
-
-    _onKeyPressEvent: function(actor, event) {
-        if (event.get_key_symbol() == Clutter.Escape) {
-            this.close(true);
-            return true;
-        }
-
-        return false;
-    },
-
-    open: function(animate, eventType) {
-
-        if (eventType == Clutter.EventType.KEY_PRESS) {
-
-            this._keyOpen(animate);
-            return;
-
-        } else if (eventType == Clutter.EventType.BUTTON_RELEASE) {
-
-            this._btnOpen(animate);
-            return;
-
-        } else {
-
-            global.log('Event type don\'t recognized: ' + eventType);
-            global.log('Expected BUTTON_RELEASE (' + Clutter.EventType.BUTTON_RELEASE + ') or KEY_PRESS (' + Clutter.EventType.KEY_PRESS + ')');
-        }
-    },
-
-    toggle: function(eventType) {
-
-        if (this.isOpen)
-            this.close(true);
-        else
-            this.open(true, eventType);
-    },
-
-    _keyOpen: function(animate) {
-
-        if (this.isOpen)
-            return;
-
-        if (lastOpened && lastOpened.isOpen)
-            lastOpened.close(true);
-
-        lastOpened = this;
-        this.isOpen = true;
-
-        this.actor.raise_top();
-        this._boxPointer.setPosition(this.sourceActor, this._alignment);
-        this._boxPointer.show(animate);
-
-        this.emit('open-state-changed', true);
-    },
-
-    _btnOpen: function(animate) {
-
-        if (this.isOpen)
-            return;
-
-        if (lastOpened && lastOpened.isOpen)
-            lastOpened.close(true);
-
-        lastOpened = this;
-        this.isOpen = true;
-
-        this.actor.raise_top();
-        this._boxPointer.setPosition(this.sourceActor, this._alignment);
-
-        let [x, y, mask] = global.get_pointer();
-        this._boxPointer._xPosition = x + 10;
-
-        //this.actor.set_anchor_point(-(this._boxPointer._xPosition + this._boxPointer._xOffset),
-        //        -(this._boxPointer._yPosition + this._boxPointer._yOffset));
-
-        this._boxPointer.show(animate);
-
-        this.emit('open-state-changed', true);
-    },
-
-    close: function(animate) {
-        if (!this.isOpen)
-            return;
-
-        if (this._activeMenuItem)
-            this._activeMenuItem.setActive(false);
-
-        this._boxPointer.hide(animate);
-
-        this.isOpen = false;
-        lastOpened = null;
-
-        this.emit('open-state-changed', false);
-    }
+PopupClassicSubMenu.prototype = {
+    __proto__: PopupMenu.PopupMenu.prototype
 };
 
+PopupClassicSubMenu.prototype._onKeyPressEvent = function(actor, event) {
 
-/**
- * Make the PopupSubMenuMenuItem use the new PopupSubMenuClassic.
- */
+    let symbol = event.get_key_symbol();
+
+    if (symbol == Clutter.Escape || symbol == Clutter.KEY_Left) {
+
+        this.close(true);
+        return true;
+    }
+
+    return false;
+};
+
+PopupClassicSubMenu.prototype.toggle = function(eventType) {
+    if (this.isOpen)
+        this.close(true);
+    else
+        this.open(true, eventType);
+};
+
+PopupClassicSubMenu.prototype.open = function(animate, eventType) {
+    if (this.isOpen)
+        return;
+
+    if (lastOpenedMenu !== null) {
+        lastOpenedMenu.close(true);
+    }
+
+    this.isOpen = true;
+    lastOpenedMenu = this;
+
+    let x = 0, y = 0;
+    this._boxPointer.setPosition(this.sourceActor, this._alignment);
+
+    // We position the menu close to the mouse coordinates if it opens by a click,
+    // otherwise it'll be positioned at the main menu border.
+    if (eventType == Clutter.EventType.BUTTON_RELEASE) {
+
+        let [sourceW, sourceH] = this.sourceActor.get_size();
+        let [sourceX, sourceY] = this.sourceActor.get_transformed_position();
+        let [xPosition, yPosition, mask] = global.get_pointer();
+        let baseX = sourceX + sourceW;
+        // Ten pixels of separation between the mouse pointer and the boxPointer
+        x = -(baseX - xPosition) + 10;
+    }
+
+    this._boxPointer.actor.set_position(x, y);
+    this._boxPointer.show(animate);
+
+    this.actor.raise_top();
+
+    this.emit('open-state-changed', true);
+};
+
+PopupClassicSubMenu.prototype.close = function(animate) {
+    PopupMenu.PopupMenu.prototype.close.call(this, animate);
+    lastOpenedMenu = null;
+}
+
+
 
 let PopupSubMenuMenuItem_init = PopupMenu.PopupSubMenuMenuItem.prototype._init;
+let PopupSubMenuMenuItem_onButtonReleaseEvent = PopupMenu.PopupSubMenuMenuItem.prototype._onButtonReleaseEvent
+let PopupSubMenuMenuItem_onKeyPressEvent = PopupMenu.PopupSubMenuMenuItem.prototype._onKeyPressEvent
 
-PopupMenu.PopupSubMenuMenuItem.prototype._init = function(text) {
+let Classic_PopupSubMenuMenuItem_init = function(text) {
 
     PopupSubMenuMenuItem_init.call(this, text);
 
     this.menu.destroy();
-    this.menu = new PopupSubMenuClassic(this.actor, 0.5, St.Side.LEFT);
-
-    Main.uiGroup.add_actor(this.menu.actor);
-    //this.menu.connect('open-state-changed', Lang.bind(this, this._subMenuOpenStateChanged));
+    this.menu = new PopupClassicSubMenu(this.actor, 0.5, St.Side.LEFT);
     this.menu.actor.hide();
+    this.menu.connect('open-state-changed', Lang.bind(this, this._subMenuOpenStateChanged));
 };
 
-PopupMenu.PopupSubMenuMenuItem.prototype._onButtonReleaseEvent = function (actor, event) {
+let Classic_PopupSubMenuMenuItem_onButtonReleaseEvent = function(actor, event) {
     this.menu.toggle(event.type());
 };
 
-PopupMenu.PopupSubMenuMenuItem.prototype._onKeyPressEvent = function(actor, event) {
+let Classic_PopupSubMenuMenuItem_onKeyPressEvent = function(actor, event) {
+
     let symbol = event.get_key_symbol();
 
     if (symbol == Clutter.KEY_Right && !this.menu.isOpen) {
@@ -196,20 +155,24 @@ PopupMenu.PopupSubMenuMenuItem.prototype._onKeyPressEvent = function(actor, even
 };
 
 
-PopupMenu.PopupBaseMenuItem.prototype._onKeyFocusIn = function(actor) {
 
-    if (this.menu && lastOpened != null) {
+let PopupBaseMenuItem_onKeyFocusIn = PopupMenu.PopupBaseMenuItem.prototype._onKeyFocusIn;
+let PopupBaseMenuItem_onHoverChanged = PopupMenu.PopupBaseMenuItem.prototype._onHoverChanged;
+
+let Classic_PopupBaseMenuItem_onKeyFocusIn = function(actor) {
+
+    if (this.menu && lastOpenedMenu != null) {
         this.menu.open(true, Clutter.EventType.KEY_PRESS);
     }
 
     this.setActive(true);
 };
 
-PopupMenu.PopupBaseMenuItem.prototype._onHoverChanged = function(actor) {
+let Classic_PopupBaseMenuItem_onHoverChanged = function(actor) {
 
     let activeChanged = actor.hover != this.active;
 
-    if (this.menu && activeChanged && actor.hover && lastOpened != null) {
+    if (this.menu && activeChanged && actor.hover && lastOpenedMenu != null) {
         this.menu.open(true, Clutter.EventType.BUTTON_RELEASE);
     }
 
@@ -218,8 +181,8 @@ PopupMenu.PopupBaseMenuItem.prototype._onHoverChanged = function(actor) {
 
 
 /**
- * Update the menus created before the load of this extension.
- */
+* Update the menus created before the load of this extension.
+*/
 function updateSubMenuItems(menu, menuItem) {
 
     let items = menu._getMenuItems();
@@ -267,21 +230,10 @@ function updateMenuItems(menu) {
     return menu;
 }
 
-function main(extensionMeta) {
-
+function main(meta) {
     Main.panel._menus._menus.forEach(function(menu) {
         updateMenuItems(menu.menu);
     });
-
-    // Wait until all the indicators are loaded, so we can change all the menus.
-    /*Main.panel.startStatusArea = Lang.bind(Main.panel, function() {
-
-        this.__proto__.startStatusArea.call(this);
-
-        this._menus._menus.forEach(function(menu) {
-            updateMenuItems(menu.menu);
-        });
-    });*/
 }
 
 function init(meta) {
@@ -289,7 +241,19 @@ function init(meta) {
 }
 
 function enable() {
+    PopupMenu.PopupSubMenuMenuItem.prototype._init = Classic_PopupSubMenuMenuItem_init;
+    PopupMenu.PopupSubMenuMenuItem.prototype._onButtonReleaseEvent = Classic_PopupSubMenuMenuItem_onButtonReleaseEvent;
+    PopupMenu.PopupSubMenuMenuItem.prototype._onKeyPressEvent = Classic_PopupSubMenuMenuItem_onKeyPressEvent;
+    PopupMenu.PopupBaseMenuItem.prototype._onKeyFocusIn = Classic_PopupBaseMenuItem_onKeyFocusIn;
+    PopupMenu.PopupBaseMenuItem.prototype._onHoverChanged = Classic_PopupBaseMenuItem_onHoverChanged;
+    main(null);
 }
 
 function disable() {
+    PopupMenu.PopupSubMenuMenuItem.prototype._init = PopupSubMenuMenuItem_init;
+    PopupMenu.PopupSubMenuMenuItem.prototype._onButtonReleaseEvent = PopupSubMenuMenuItem_onButtonReleaseEvent;
+    PopupMenu.PopupSubMenuMenuItem.prototype._onKeyPressEvent = PopupSubMenuMenuItem_onKeyPressEvent;
+    PopupMenu.PopupBaseMenuItem.prototype._onKeyFocusIn = PopupBaseMenuItem_onKeyFocusIn;
+    PopupMenu.PopupBaseMenuItem.prototype._onHoverChanged = PopupBaseMenuItem_onHoverChanged;
+    main(null);
 }
