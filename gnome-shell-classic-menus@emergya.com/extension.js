@@ -111,8 +111,10 @@ PopupClassicSubMenu.prototype.toggle = function(eventType) {
 };
 
 PopupClassicSubMenu.prototype.open = function(animate, eventType) {
-    if (this.isOpen)
+
+    if (this.isOpen) {
         return;
+    }
 
     if (lastOpenedMenu !== null) {
         lastOpenedMenu.close(true);
@@ -123,6 +125,7 @@ PopupClassicSubMenu.prototype.open = function(animate, eventType) {
 
     let x = 0, y = 0;
     this._boxPointer.setPosition(this.sourceActor, this._arrowAlignment);
+    this._boxPointer.show(animate);
 
     // We position the menu close to the mouse coordinates if it opens by a click,
     // otherwise it'll be positioned at the main menu border.
@@ -137,12 +140,21 @@ PopupClassicSubMenu.prototype.open = function(animate, eventType) {
     }
 
     this._boxPointer.actor.set_position(x, y);
-    this._boxPointer.show(animate);
+    //this._boxPointer.show(animate);
 
     let [w, h] = this._boxPointer.actor.get_size();
     let allowedHeight = Main.layoutManager.primaryMonitor.height * MAX_SUBMENU_HEIGHT;
     if (h > allowedHeight) {
-        this._boxPointer.actor.set_size(w, allowedHeight);
+
+        // Allow some tolerance if there is only one element in the list,
+        // don't show the scrollbar for a few pixels.
+        let children = this.box.get_children();
+        let [cw, ch] = children[0].get_size();
+        let tolerance = h - allowedHeight <= ch;
+
+        if (!tolerance) {
+            this._boxPointer.actor.set_size(w, allowedHeight);
+        }
     }
 
     this.actor.raise_top();
