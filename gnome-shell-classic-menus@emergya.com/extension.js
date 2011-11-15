@@ -177,7 +177,7 @@ let PopupBaseMenuItem_onHoverChanged = PopupMenu.PopupBaseMenuItem.prototype._on
 
 let Classic_PopupBaseMenuItem_onKeyFocusIn = function(actor) {
 
-    if (this.menu && lastOpenedMenu != null) {
+    if (this.menu && lastOpenedMenu != null && this.menu !== lastOpenedMenu) {
         this.menu.open(true, Clutter.EventType.KEY_PRESS);
     }
 
@@ -188,7 +188,7 @@ let Classic_PopupBaseMenuItem_onHoverChanged = function(actor) {
 
     let activeChanged = actor.hover != this.active;
 
-    if (this.menu && activeChanged && actor.hover && lastOpenedMenu != null) {
+    if (this.menu && activeChanged && actor.hover && lastOpenedMenu != null && this.menu !== lastOpenedMenu) {
         this.menu.open(true, Clutter.EventType.BUTTON_RELEASE);
     }
 
