@@ -81,7 +81,7 @@ PopupClassicSubMenu.prototype.open = function(animate, eventType) {
     lastOpenedMenu = this;
 
     let x = 0, y = 0;
-    this._boxPointer.setPosition(this.sourceActor, this._alignment);
+    this._boxPointer.setPosition(this.sourceActor, this._arrowAlignment);
 
     // We position the menu close to the mouse coordinates if it opens by a click,
     // otherwise it'll be positioned at the main menu border.
