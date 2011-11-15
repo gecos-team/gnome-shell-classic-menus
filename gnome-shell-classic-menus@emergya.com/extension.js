@@ -62,7 +62,6 @@ PopupClassicSubMenu.prototype = {
         // clutter_set_motion_events_enabled (FALSE) during the scroll; this
         // confuses our event tracking, so we just turn it off during the
         // scroll.
-        /*
         let vscroll = this._scrollview.get_vscroll_bar();
         vscroll.connect('scroll-start',
                         Lang.bind(this, function() {
@@ -76,19 +75,16 @@ PopupClassicSubMenu.prototype = {
                                       if (topMenu)
                                           topMenu.passEvents = false;
                                   }));
-        */
 
         this.box.reparent(this._scrollview);
         this._boxPointer.bin.set_child(this._scrollview);
 
-        //this._scrollview._delegate = this;
         this._scrollview.clip_to_allocation = true;
-        //this._scrollview.connect('key-press-event', Lang.bind(this, this._onKeyPressEvent));
-        //this._scrollview.hide();
-
         this._scrollview.vscrollbar_policy = Gtk.PolicyType.AUTOMATIC;
     }
 };
+
+PopupClassicSubMenu.prototype._getTopMenu = PopupMenu.PopupSubMenu.prototype._getTopMenu;
 
 PopupClassicSubMenu.prototype._onKeyPressEvent = function(actor, event) {
 
