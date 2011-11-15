@@ -36,6 +36,9 @@ const BoxPointer = imports.ui.boxpointer;
 const Clutter = imports.gi.Clutter;
 const Gtk = imports.gi.Gtk;
 
+// This is the maximun submenu height relative to the
+// primary monitor height.
+const MAX_SUBMENU_HEIGHT = 3/4;
 
 let lastOpenedMenu = null;
 
@@ -135,6 +138,12 @@ PopupClassicSubMenu.prototype.open = function(animate, eventType) {
 
     this._boxPointer.actor.set_position(x, y);
     this._boxPointer.show(animate);
+
+    let [w, h] = this._boxPointer.actor.get_size();
+    let allowedHeight = Main.layoutManager.primaryMonitor.height * MAX_SUBMENU_HEIGHT;
+    if (h > allowedHeight) {
+        this._boxPointer.actor.set_size(w, allowedHeight);
+    }
 
     this.actor.raise_top();
 
