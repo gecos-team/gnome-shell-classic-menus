@@ -45,7 +45,49 @@ function PopupClassicSubMenu() {
 }
 
 PopupClassicSubMenu.prototype = {
-    __proto__: PopupMenu.PopupMenu.prototype
+    __proto__: PopupMenu.PopupMenu.prototype,
+
+    _init: function(sourceActor, arrowAlignment, arrowSide) {
+
+        PopupMenu.PopupMenu.prototype._init.call(this, sourceActor, arrowAlignment, arrowSide);
+
+        // Since a function of a submenu might be to provide a "More.." expander
+        // with long content, we make it scrollable - the scrollbar will only take
+        // effect if a CSS max-height is set on the top menu.
+        this._scrollview = new St.ScrollView({ style_class: 'popup-sub-menu',
+                                         hscrollbar_policy: Gtk.PolicyType.NEVER,
+                                         vscrollbar_policy: Gtk.PolicyType.NEVER });
+
+        // StScrollbar plays dirty tricks with events, calling
+        // clutter_set_motion_events_enabled (FALSE) during the scroll; this
+        // confuses our event tracking, so we just turn it off during the
+        // scroll.
+        /*
+        let vscroll = this._scrollview.get_vscroll_bar();
+        vscroll.connect('scroll-start',
+                        Lang.bind(this, function() {
+                                      let topMenu = this._getTopMenu();
+                                      if (topMenu)
+                                          topMenu.passEvents = true;
+                                  }));
+        vscroll.connect('scroll-stop',
+                        Lang.bind(this, function() {
+                                      let topMenu = this._getTopMenu();
+                                      if (topMenu)
+                                          topMenu.passEvents = false;
+                                  }));
+        */
+
+        this.box.reparent(this._scrollview);
+        this._boxPointer.bin.set_child(this._scrollview);
+
+        //this._scrollview._delegate = this;
+        this._scrollview.clip_to_allocation = true;
+        //this._scrollview.connect('key-press-event', Lang.bind(this, this._onKeyPressEvent));
+        //this._scrollview.hide();
+
+        this._scrollview.vscrollbar_policy = Gtk.PolicyType.AUTOMATIC;
+    }
 };
 
 PopupClassicSubMenu.prototype._onKeyPressEvent = function(actor, event) {
