@@ -126,21 +126,20 @@ PopupClassicSubMenu.prototype.open = function(animate, eventType) {
     let x = 0, y = 0;
     this._boxPointer.setPosition(this.sourceActor, this._arrowAlignment);
     this._boxPointer.show(animate);
+    this.actor.raise_top();
 
-    // We position the menu close to the mouse coordinates if it opens by a click,
+    // Position the menu close to the mouse coordinates if it opens by a click,
     // otherwise it'll be positioned at the main menu border.
     if (eventType == Clutter.EventType.BUTTON_RELEASE) {
 
+        let [xPosition, yPosition, mask] = global.get_pointer();
         let [sourceW, sourceH] = this.sourceActor.get_size();
         let [sourceX, sourceY] = this.sourceActor.get_transformed_position();
-        let [xPosition, yPosition, mask] = global.get_pointer();
-        let baseX = sourceX + sourceW;
-        // Ten pixels of separation between the mouse pointer and the boxPointer
-        x = -(baseX - xPosition) + 10;
+        // Adds a separation between the mouse pointer and the boxPointer
+        x = -(sourceX + sourceW - xPosition) + 15;
     }
 
     this._boxPointer.actor.set_position(x, y);
-    //this._boxPointer.show(animate);
 
     let [w, h] = this._boxPointer.actor.get_size();
     let allowedHeight = Main.layoutManager.primaryMonitor.height * MAX_SUBMENU_HEIGHT;
@@ -156,8 +155,6 @@ PopupClassicSubMenu.prototype.open = function(animate, eventType) {
             this._boxPointer.actor.set_size(w, allowedHeight);
         }
     }
-
-    this.actor.raise_top();
 
     this.emit('open-state-changed', true);
 };
