@@ -134,9 +134,17 @@ PopupClassicSubMenu.prototype.open = function(animate, eventType) {
 
         let [xPosition, yPosition, mask] = global.get_pointer();
         let [sourceW, sourceH] = this.sourceActor.get_size();
-        let [sourceX, sourceY] = this.sourceActor.get_transformed_position();
+        //let [sourceX, sourceY] = this.sourceActor.get_transformed_position();
+        [success, x, y] = this.sourceActor.transform_stage_point(xPosition, yPosition);
+        x = Math.floor(x);
+        y = Math.floor(y);
         // Adds a separation between the mouse pointer and the boxPointer
-        x = -(sourceX + sourceW - xPosition) + 15;
+        x = -(sourceW - x) + 20;
+
+        //global.log('global: x = ' + xPosition + ', y = ' + yPosition);
+        //global.log('actor: x = ' + x + ', y = ' + y);
+        //global.log(success);
+        //global.log('====================');
     }
 
     this._boxPointer.actor.set_position(x, y);
