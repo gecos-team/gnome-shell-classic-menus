@@ -147,7 +147,6 @@ PopupClassicSubMenu.prototype.open = function(animate, eventType) {
         //global.log('actor: x = ' + x + ', y = ' + y);
         //global.log(success);
         //global.log('====================');
-    global.logger.debug(sourceW, sourceH);
     }
     this._boxPointer.actor.set_position(x, y);
 
