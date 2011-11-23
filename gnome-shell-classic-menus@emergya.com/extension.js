@@ -93,7 +93,7 @@ PopupClassicSubMenu.prototype._onKeyPressEvent = function(actor, event) {
 
     let symbol = event.get_key_symbol();
 
-    if (symbol == Clutter.Escape  || symbol == Clutter.KEY_Left) {
+    if (symbol == Clutter.Escape || symbol == Clutter.KEY_Left) {
 
         this.close(true);
         return true;
@@ -172,6 +172,9 @@ PopupClassicSubMenu.prototype.close = function(animate) {
         return;
     if (this._activeMenuItem)
         this._activeMenuItem.setActive(false);
+
+    // TODO: We have to overwrite this._boxPointer.hide() method,
+    // remove the unwanted funcionality and leave the good things.
     this._boxPointer.actor.hide(false);
 //    this._boxPointer.hide(false);
 
