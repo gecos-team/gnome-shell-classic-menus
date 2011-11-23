@@ -93,7 +93,7 @@ PopupClassicSubMenu.prototype._onKeyPressEvent = function(actor, event) {
 
     let symbol = event.get_key_symbol();
 
-    if (symbol == Clutter.Escape || symbol == Clutter.KEY_Left) {
+    if (symbol == Clutter.Escape  || symbol == Clutter.KEY_Left) {
 
         this.close(true);
         return true;
@@ -117,11 +117,13 @@ PopupClassicSubMenu.prototype.open = function(animate, eventType) {
     }
 
     if (lastOpenedMenu !== null) {
+
         lastOpenedMenu.close(true);
     }
 
     this.isOpen = true;
     lastOpenedMenu = this;
+
 
     let x = 0, y = 0;
     this._boxPointer.setPosition(this.sourceActor, this._arrowAlignment);
@@ -145,8 +147,8 @@ PopupClassicSubMenu.prototype.open = function(animate, eventType) {
         //global.log('actor: x = ' + x + ', y = ' + y);
         //global.log(success);
         //global.log('====================');
+    global.logger.debug(sourceW, sourceH);
     }
-
     this._boxPointer.actor.set_position(x, y);
 
     let [w, h] = this._boxPointer.actor.get_size();
@@ -158,12 +160,10 @@ PopupClassicSubMenu.prototype.open = function(animate, eventType) {
         let children = this.box.get_children();
         let [cw, ch] = children[0].get_size();
         let tolerance = h - allowedHeight <= ch;
-
         if (!tolerance) {
             this._boxPointer.actor.set_size(w, allowedHeight);
         }
     }
-
     this.emit('open-state-changed', true);
 };
 
@@ -171,17 +171,17 @@ PopupClassicSubMenu.prototype.close = function(animate) {
 
     if (!this.isOpen)
         return;
-
     if (this._activeMenuItem)
         this._activeMenuItem.setActive(false);
-
-    this._boxPointer.hide(animate);
+    this._boxPointer.actor.hide(false);
+//    this._boxPointer.hide(false);
 
     this.isOpen = false;
 
     // Important: Return the focus to the parent menu before emit the
     // open-state-changed event, so it'll not be closed by the PopupMenuManager.
-    this.sourceActor.navigate_focus(null, Gtk.DirectionType.DOWN, false);
+
+    this.sourceActor.navigate_focus(null, Gtk.DirectionType.DOWN, true);
     lastOpenedMenu = null;
 
     this.emit('open-state-changed', false);
