@@ -103,8 +103,9 @@ PopupClassicSubMenu.prototype._onKeyPressEvent = function(actor, event) {
     return false;
 };
 
-PopupClassicSubMenu.prototype.toggle = function(eventType) {
-    if (this.isOpen) {
+PopupClassicSubMenu.prototype.toggle = function(eventType, menuItemActive) {
+     
+    if (this.isOpen && menuItemActive) {
         this.close(true);
     } else {
         this.open(true, eventType);
@@ -205,7 +206,12 @@ let Classic_PopupSubMenuMenuItem_init = function(text) {
 };
 
 let Classic_PopupSubMenuMenuItem_onButtonReleaseEvent = function(actor, event) {
-    this.menu.toggle(event.type());
+
+
+
+    this.menu.toggle(event.type(), this.active);
+    let activeChanged = actor.hover != this.active;
+    this.setActive(actor.hover);
 };
 
 let Classic_PopupSubMenuMenuItem_onKeyPressEvent = function(actor, event) {
@@ -226,7 +232,10 @@ let Classic_PopupSubMenuMenuItem_onKeyPressEvent = function(actor, event) {
         this.menu.close();
         return true;
 
-    } else if (symbol == Clutter.KEY_space || symbol == Clutter.KEY_Return || symbol == Clutter.KP_Enter) {
+    }else if (symbol == Clutter.Escape && this.menu.isOpen){
+        this.menu.close();
+        return true; 
+    }else if (symbol == Clutter.KEY_space || symbol == Clutter.KEY_Return || symbol == Clutter.KP_Enter) {
 
         this.menu.toggle(event.type());
         if (this.menu.isOpen) {
