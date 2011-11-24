@@ -168,19 +168,20 @@ PopupClassicSubMenu.prototype.open = function(animate, eventType) {
 
 PopupClassicSubMenu.prototype.close = function(animate) {
 
+    this.sourceActor.navigate_focus(null, Gtk.DirectionType.DOWN, false);
     if (!this.isOpen)
         return;
     if (this._activeMenuItem)
         this._activeMenuItem.setActive(false);
-    this._boxPointer.actor.hide(false);
-//    this._boxPointer.hide(false);
+    this._boxPointer.actor.hide();
+    //this._boxPointer.hide(animate);
 
     this.isOpen = false;
 
     // Important: Return the focus to the parent menu before emit the
     // open-state-changed event, so it'll not be closed by the PopupMenuManager.
 
-    this.sourceActor.navigate_focus(null, Gtk.DirectionType.DOWN, false);
+    //this.sourceActor.navigate_focus(null, Gtk.DirectionType.DOWN, false);
     lastOpenedMenu = null;
 
     this.emit('open-state-changed', false);
