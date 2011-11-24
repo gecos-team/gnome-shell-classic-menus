@@ -98,6 +98,7 @@ PopupClassicSubMenu.prototype._onKeyPressEvent = function(actor, event) {
         this.close(true);
         return true;
     }
+    
 
     return false;
 };
@@ -220,7 +221,10 @@ let Classic_PopupSubMenuMenuItem_onKeyPressEvent = function(actor, event) {
         this.menu.actor.navigate_focus(null, Gtk.DirectionType.DOWN, false);
         return true;
 
-    } else if (symbol == Clutter.KEY_Left && this.menu.isOpen) {
+    }else if (symbol == Clutter.KEY_Right && this.menu.isOpen){
+        this.menu.actor.navigate_focus(null, Gtk.DirectionType.DOWN, false);
+        return true; 
+    }else if (symbol == Clutter.KEY_Left && this.menu.isOpen) {
 
         this.menu.close();
         return true;
