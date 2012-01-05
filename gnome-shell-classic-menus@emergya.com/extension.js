@@ -132,24 +132,35 @@ PopupClassicSubMenu.prototype.open = function(animate, eventType) {
     this._boxPointer.show(animate);
     this.actor.raise_top();
 
+    let monitor = Main.layoutManager.primaryMonitor;
+    let [sourceW, sourceH] = this._boxPointer.actor.get_size();
+    let [sourceX, sourceY] = this._boxPointer.actor.get_transformed_position();
+
+    // If the submenu border is out of the screen open
+    // in the other direction.
+    if (sourceX + sourceW >= monitor.width) {
+        this._boxPointer._arrowSide = St.Side.RIGHT;
+    }
+
+
     // Position the menu close to the mouse coordinates if it opens by a click,
     // otherwise it'll be positioned at the main menu border.
-    if (eventType == Clutter.EventType.BUTTON_RELEASE) {
+//    if (eventType == Clutter.EventType.BUTTON_RELEASE) {
 
-        let [xPosition, yPosition, mask] = global.get_pointer();
-        let [sourceW, sourceH] = this.sourceActor.get_size();
+//        let [xPosition, yPosition, mask] = global.get_pointer();
+//        let [sourceW, sourceH] = this.sourceActor.get_size();
         //let [sourceX, sourceY] = this.sourceActor.get_transformed_position();
-        [success, x, y] = this.sourceActor.transform_stage_point(xPosition, yPosition);
-        x = Math.floor(x);
-        y = Math.floor(y);
+//        [success, x, y] = this.sourceActor.transform_stage_point(xPosition, yPosition);
+//        x = Math.floor(x);
+//        y = Math.floor(y);
         // Adds a separation between the mouse pointer and the boxPointer
-        x = -(sourceW - x) + 20;
+//        x = -(sourceW - x) + 20;
 
         //global.log('global: x = ' + xPosition + ', y = ' + yPosition);
         //global.log('actor: x = ' + x + ', y = ' + y);
         //global.log(success);
         //global.log('====================');
-    }
+//    }
     this._boxPointer.actor.set_position(x, y);
 
     let [w, h] = this._boxPointer.actor.get_size();
