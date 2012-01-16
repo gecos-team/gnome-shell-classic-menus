@@ -138,7 +138,7 @@ PopupClassicSubMenu.prototype.open = function(animate, eventType) {
 
     // If the submenu border is out of the screen open
     // in the other direction.
-    if (sourceX + sourceW >= monitor.width) {
+    if (sourceX + sourceW >= monitor.width  && sourceX >= 2 * sourceW) {
         this._boxPointer._arrowSide = St.Side.RIGHT;
     }
 
